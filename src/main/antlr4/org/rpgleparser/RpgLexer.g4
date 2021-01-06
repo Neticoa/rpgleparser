@@ -21,7 +21,7 @@ fragment WORD5 : ~[\r\n]~[\r\n]~[\r\n]~[\r\n]~[\r\n] ;
 fragment NAME5 : NAMECHAR NAMECHAR NAMECHAR NAMECHAR NAMECHAR;
 
 // valid characters in symbolic names.
-fragment NAMECHAR : [A-Za-z0-9$#@_ ] ;
+fragment NAMECHAR : [A-Za-z0-9$#@£à_ ] ;
 
 // names cannot start with _ or numbers
 fragment INITNAMECHAR : [A-Za-z$#@] ;
@@ -672,7 +672,7 @@ SPLAT_HIVAL : '*' [hH] [iI] [vV] [aA] [lL] ;
 
 SPLAT_INIT : '*' [iI] [nN] [iI] [tT] ;
 
-SPLAT_INDICATOR : ( '*' [iI] [nN] [0-9] [0-9] | '*' [iI] [nN] '(' [0-9] [0-9] ')' );
+SPLAT_INDICATOR : ( '*' [iI] [nN] [oO] [aA] | '*' [iI] [nN] [oO] [bB] | '*' [iI] [nN] [oO] [cC] | '*' [iI] [nN] [oO] [dD] | '*' [iI] [nN] [oO] [eE] | '*' [iI] [nN] [oO] [fF] | '*' [iI] [nN] [oO] [gG] | '*' [iI] [nN] [oO] [vV] | '*' [iI] [nN] [0-9] [0-9] | '*' [iI] [nN] '(' [0-9] [0-9] ')' );
 
 SPLAT_INZSR : '*' [iI] [nN] [zZ] [sS] [rR] ;
 
