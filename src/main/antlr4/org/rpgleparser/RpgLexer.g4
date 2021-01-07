@@ -30,6 +30,7 @@ fragment WORD_WCOLON : ~[\r\n] ;
 
 fragment WORD5_WCOLON : WORD_WCOLON WORD_WCOLON WORD_WCOLON WORD_WCOLON WORD_WCOLON;
 
+fragment SPACE : ( ' ' | '\uC29A' | '\uC282' | '\uC280' ) ;
 
 mode Selector;
 FREE_SPEC : [  ] -> popMode,pushMode(FREE_Start), skip;
@@ -52,15 +53,17 @@ PS_FIXED : [pP] -> popMode,pushMode(FIXED_ProcedureSpec) ;
 
 HS_FIXED : [hH] -> popMode,pushMode(HeaderSpecMode) ;
 
-BLANK_LINE : [ ] [ ]* NEWLINE -> popMode,skip;
+
+
+BLANK_LINE :  SPACE* NEWLINE -> popMode,skip;
 
 BLANK_SPEC_LINE1 : . NEWLINE -> popMode,skip;
 
-BLANK_SPEC_LINE : .[ ] [ ]* NEWLINE -> popMode,skip;
+BLANK_SPEC_LINE : .SPACE SPACE* NEWLINE -> popMode,skip;
 
-COMMENTS : [ ] [ ]*? '//' -> popMode,pushMode(FIXED_CommentMode), channel(HIDDEN) ;
+COMMENTS : SPACE SPACE*? '//' -> popMode,pushMode(FIXED_CommentMode), channel(HIDDEN) ;
 
-DIRECTIVE :  . [ ]*? '/' -> popMode,pushMode(DirectiveMode_Start) ;
+DIRECTIVE :  . SPACE*? '/' -> popMode,pushMode(DirectiveMode_Start) ;
 
 NEWLINE : '\r'? '\n' -> popMode,skip;
 WS : [ \t] { getCharPositionInLine()>6 }? [ \t]* -> skip ; // skip spaces, tabs
@@ -113,7 +116,7 @@ DIR_Start_Any : -> popMode, pushMode(DirectiveMode);
 
 
 mode CopyMode;
-COPY_WhiteSpace : [ ] -> skip;
+COPY_WhiteSpace : SPACE -> skip;
 COPY_OtherText : ~[/'"\r\n \t,()] {getCharPositionInLine()<50}? DIR_OtherText -> type(DIR_OtherText) ;
 COPY_Comma : DIR_Comma -> type(DIR_Comma);
 COPY_Slash : DIR_Slash -> type(DIR_Slash);
@@ -130,7 +133,7 @@ DIR_DEFINED : [dD] [eE] [fF] [iI] [nN] [eE] [dD] ;
 
 DIR_Number : NUMBER -> type(NUMBER);
 
-DIR_WhiteSpace : [ ] -> skip;
+DIR_WhiteSpace : SPACE -> skip;
 
 DIR_OtherText : ~[/'"\r\n \t,()]+ ;
 
@@ -146,7 +149,7 @@ DIR_DblStringLiteralStart : ["] -> pushMode(InDoubleStringMode), type(StringLite
 
 DIR_StringLiteralStart : ['] -> pushMode(InStringMode), type(StringLiteralStart) ;
 
-DIR_EOL : [ ]* NEWLINE { setText(getText().trim()); } -> type(EOL), popMode;
+DIR_EOL : SPACE* NEWLINE { setText(getText().trim()); } -> type(EOL), popMode;
 
 
 mode CheckComment;
@@ -321,7 +324,7 @@ FS_FreeFile : [dD] [cC] [lL] '-' [fF]  -> mode(FREE);
 
 H_SPEC : [cC] [tT] [lL] '-' [oO] [pP] [tT] -> mode(FREE);
 
-EXEC_SQL : [Ee] [Xx] [Ee] [Cc] [ ]+[Ss] [Qq] [Ll]-> pushMode(SQL_MODE) ;
+EXEC_SQL : [Ee] [Xx] [Ee] [Cc] SPACE+[Ss] [Qq] [Ll]-> pushMode(SQL_MODE) ;
 
 //Keywords copied
 FREE_Start_KEYWORD_ALIAS  : KEYWORD_ALIAS -> type(KEYWORD_ALIAS),mode(FREE);
@@ -422,7 +425,7 @@ FREE_Start_NoSpace : {if (false) System.out.println("FREE_Start_NoSpace");}-> sk
 mode FREE;
 Inline_DS_DataStructureEnd : DS_DataStructureEnd -> type(DS_DataStructureEnd),mode(FREE);
 
-FREE_CONT : '...' [ ]* NEWLINE WORD5[ ]+ { setText("...");} -> type(CONTINUATION);
+FREE_CONT : '...' SPACE* NEWLINE WORD5 SPACE+ { setText("...");} -> type(CONTINUATION);
 
 FREE_COMMENTS80 : ~[\r\n] { getCharPositionInLine()>80 }? ~[\r\n]* -> channel(HIDDEN); // skip comments after 80
 
@@ -994,7 +997,7 @@ ID : '*' [iI] [nN] ( [kK] [a-np-yA-NP-Y] | [uU] [1-8] )
    | '*' [mM] [a-zA-Z] [a-zA-Z] [a-zA-Z] [0-9] [0-9] [0-9] [0-9] // opcode DSPLY message id format
    | [_#@%$a-zA-Z] { getCharPositionInLine() >= 7 }? [#@$a-zA-Z0-9_]* ;
 
-FREE_COMMENTS :  [ ]*? '//' { getCharPositionInLine()>=8 }? {if (false) System.out.println("FREE_COMMENTS");}-> pushMode(FIXED_CommentMode_HIDDEN), channel(HIDDEN) ;
+FREE_COMMENTS :  SPACE*? '//' { getCharPositionInLine()>=8 }? {if (false) System.out.println("FREE_COMMENTS");}-> pushMode(FIXED_CommentMode_HIDDEN), channel(HIDDEN) ;
 
 FREE_WS : [ \t] { getCharPositionInLine()>6 }? [ \t]* -> skip;
 
@@ -1011,7 +1014,7 @@ D_FREE_CONTINUATION_DOTS : '...' { _modeStack.peek()==FIXED_DefSpec }? WS* NEWLI
 C_FREE_CONTINUATION : NEWLINE { _modeStack.peek()==FIXED_CalcSpec}?
     (
         (WORD5 ~[\r\n] [*] ~[\r\n]* NEWLINE) //Skip mid statement comments
-    |    (WORD5 ~[\r\n] [ ]* NEWLINE) //Skip mid statement blanks
+    |    (WORD5 ~[\r\n] SPACE* NEWLINE) //Skip mid statement blanks
     )*
      WORD5 [cC] ~[*] '                            ' -> skip;
 
@@ -1025,7 +1028,7 @@ FREE_LEAD_WS5 :   '     ' { getCharPositionInLine()==5 }? -> skip;
 
 FREE_LEAD_WS5_Comments :  WORD5 { getCharPositionInLine()==5 }? -> channel(HIDDEN);
 
-FREE_FREE_SPEC :  [ ] [ ] { getCharPositionInLine()==7 }? -> skip;
+FREE_FREE_SPEC :  SPACE SPACE { getCharPositionInLine()==7 }? -> skip;
 
 C_FREE_NEWLINE : NEWLINE { _modeStack.peek()==FIXED_CalcSpec }? {if (false) System.out.println("C_FREE_NEWLINE");}-> popMode, popMode;
 
@@ -1097,8 +1100,8 @@ CheckDuration_SPLAT_YEAR : SPLAT_YEAR -> type(SPLAT_YEAR),popMode;
 CheckDuration_ANY : -> popMode, skip;
 
 mode NumberContinuation;
-NumberContinuation_CONTINUATION : ([ ]* NEWLINE)
-    WORD5 [dD] ~[*] '                            ' [ ]* -> skip;
+NumberContinuation_CONTINUATION : (SPACE* NEWLINE)
+    WORD5 [dD] ~[*] '                            ' SPACE* -> skip;
 
 NumberPart : NUMBER -> popMode;
 
@@ -1312,7 +1315,7 @@ OP_Z_SUB : [zZ] '-' [sS] [uU] [bB] ;
 
 
 mode FREE_ENDED;
-FE_BLANKS : [ ]+ -> skip;
+FE_BLANKS : SPACE+ -> skip;
 
 FE_COMMENTS : '//' -> popMode, pushMode(FIXED_CommentMode_HIDDEN), channel(HIDDEN) ;
 
@@ -1323,19 +1326,19 @@ mode InStringMode;
 //  Any char except +,- or ', or a + or - followed by more than just whitespace
 StringContent : (
        ~['\r\n+-]
-       | [+-] [ ]* { _input.LA(1)!=' ' && _input.LA(1)!='\r' && _input.LA(1)!='\n' }? // Plus is ok as long as it's not the last char
+       | [+-] SPACE* { _input.LA(1)!=' ' && _input.LA(1)!='\r' && _input.LA(1)!='\n' }? // Plus is ok as long as it's not the last char
        )+;// space or not
 
 StringEscapedQuote : ['] ['] { setText("'");};
 
 StringLiteralEnd : ['] -> popMode;
 
-FIXED_FREE_STRING_CONTINUATION : ('+' [ ]* NEWLINE)
+FIXED_FREE_STRING_CONTINUATION : ('+' SPACE* NEWLINE)
    { _modeStack.contains(FIXED_CalcSpec) || _modeStack.contains(FIXED_DefSpec)
      || _modeStack.contains(FIXED_OutputSpec)}?
    -> pushMode(EatCommentLinesPlus), pushMode(EatCommentLines), skip;
 
-FIXED_FREE_STRING_CONTINUATION_MINUS : ('-' [ ]* NEWLINE)
+FIXED_FREE_STRING_CONTINUATION_MINUS : ('-' SPACE* NEWLINE)
    { _modeStack.contains(FIXED_CalcSpec) || _modeStack.contains(FIXED_DefSpec)
      || _modeStack.contains(FIXED_OutputSpec)}?
    -> pushMode(EatCommentLines), skip;
@@ -1343,12 +1346,12 @@ FIXED_FREE_STRING_CONTINUATION_MINUS : ('-' [ ]* NEWLINE)
 FREE_STRING_CONTINUATION_PLUS : {!_modeStack.contains(FIXED_CalcSpec)
      && !_modeStack.contains(FIXED_DefSpec)
      && !_modeStack.contains(FIXED_OutputSpec)}?
-      '+' [ ]* NEWLINE WORD5 '  ' [ ]* -> skip;
+      '+' SPACE* NEWLINE WORD5 '  ' SPACE* -> skip;
 
 FREE_STRING_CONTINUATION_MINUS : {!_modeStack.contains(FIXED_CalcSpec)
      && !_modeStack.contains(FIXED_DefSpec)
      && !_modeStack.contains(FIXED_OutputSpec)}?
-      '-' [ ]* NEWLINE WORD5 '  ' -> skip;
+      '-' SPACE* NEWLINE WORD5 '  ' -> skip;
 
 PlusOrMinus : [+-] ;
 
@@ -1366,7 +1369,7 @@ EatCommentLinesPlus_Any : -> popMode, skip;
 
 // Inside continuations, ignore comment and blank lines.
 mode EatCommentLines;
-EatCommentLines_WhiteSpace : WORD5~[\r\n]{ getCharPositionInLine()==6}?[ ]* NEWLINE -> skip;
+EatCommentLines_WhiteSpace : WORD5~[\r\n]{ getCharPositionInLine()==6}?SPACE* NEWLINE -> skip;
 
 EatCommentLines_StarComment :
    WORD5~[\r\n]{ getCharPositionInLine()==6 }? [*] ~[\r\n]* NEWLINE -> skip;
@@ -1383,7 +1386,7 @@ FIXED_FREE_STRING_CONTINUATION_Part2 :
        | '                                    ' { _modeStack.contains(FIXED_DefSpec)}?
        | '                                             ' { _modeStack.contains(FIXED_OutputSpec)}?
      )
-     ([ ]* { _modeStack.peek() == EatCommentLinesPlus}?
+     (SPACE* { _modeStack.peek() == EatCommentLinesPlus}?
       |
      )  // If it plus continuation eat whitespace.
    )
@@ -1423,7 +1426,7 @@ InFactor_EndFactor : {(getCharPositionInLine()==25)
 
 
 mode FIXED_CommentMode;
-BLANK_COMMENTS_TEXT : [ ]+ -> skip;
+BLANK_COMMENTS_TEXT : SPACE+ -> skip;
 
 COMMENTS_TEXT : ~[\r\n]+ { setText(getText().trim());} -> channel(HIDDEN);
 
@@ -1431,13 +1434,13 @@ COMMENTS_EOL : NEWLINE -> popMode, skip;
 
 
 mode FIXED_CommentMode_HIDDEN;
-COMMENTS_TEXT_SKIP : [ ]+ -> skip;
+COMMENTS_TEXT_SKIP : SPACE+ -> skip;
 
 COMMENTS_TEXT_HIDDEN :  ~[\r\n]* -> channel(HIDDEN);
 
 COMMENTS_EOL_HIDDEN : NEWLINE {_modeStack.peek()!=FREE}?->  channel(HIDDEN), popMode;
 
-COMMENTS_EOL_HIDDEN_FREE : NEWLINE (WORD5 [ ])? {_modeStack.peek()==FREE}?->  type(COMMENTS_EOL_HIDDEN), channel(HIDDEN), popMode;
+COMMENTS_EOL_HIDDEN_FREE : NEWLINE (WORD5 SPACE)? {_modeStack.peek()==FREE}?->  type(COMMENTS_EOL_HIDDEN), channel(HIDDEN), popMode;
 
 
 mode SQL_MODE;
@@ -1451,7 +1454,7 @@ WORDS : ~[ ;\r\n] (~[;\r\n]+ ~[ ;\r\n])?;
 mode FIXED_ProcedureSpec;
 PS_NAME :  NAME5 NAME5 NAME5 { getCharPositionInLine()==21 }? { setText(getText().trim()); } ;
 
-PS_CONTINUATION_NAME : [ ]* ~[\r\n ]+ PS_CONTINUATION { setText(getText().substring(0,getText().length()-3)); } -> pushMode(CONTINUATION_ELIPSIS) ;
+PS_CONTINUATION_NAME : SPACE* ~[\r\n ]+ PS_CONTINUATION { setText(getText().substring(0,getText().length()-3)); } -> pushMode(CONTINUATION_ELIPSIS) ;
 
 PS_CONTINUATION : '...' ;
 
@@ -1465,7 +1468,7 @@ PS_RESERVED2 : '                   ' { getCharPositionInLine()==43 }? -> skip;
 
 PS_KEYWORDS : ~[\r\n] { getCharPositionInLine()==44 }? (~[\r\n] { getCharPositionInLine()<=80}?)*;
 
-PS_WS80 : [ ] { getCharPositionInLine()>80 }? [ ]* NEWLINE -> skip;
+PS_WS80 : SPACE { getCharPositionInLine()>80 }? SPACE* NEWLINE -> skip;
 
 PS_COMMENTS80 : FREE_COMMENTS80-> channel(HIDDEN), popMode;
 
@@ -1477,7 +1480,7 @@ BLANK_SPEC :
     '                                                                           '
     { getCharPositionInLine()==81 }? ;
 
-CONTINUATION_NAME : { getCharPositionInLine()<21 }? [ ]* NAMECHAR+ CONTINUATION { setText(getText().substring(0,getText().length()-3).trim());} -> pushMode(CONTINUATION_ELIPSIS) ;
+CONTINUATION_NAME : { getCharPositionInLine()<21 }? SPACE* NAMECHAR+ CONTINUATION { setText(getText().substring(0,getText().length()-3).trim());} -> pushMode(CONTINUATION_ELIPSIS) ;
 
 CONTINUATION : '...' ;
 
@@ -1487,7 +1490,7 @@ EXTERNAL_DESCRIPTION : [eE ] { getCharPositionInLine()==22 }? ;
 
 DATA_STRUCTURE_TYPE : [sSuU ] { getCharPositionInLine()==23 }? ;
 
-DEF_TYPE_C : [cC] [ ] { getCharPositionInLine()==25 }? ;
+DEF_TYPE_C : [cC] SPACE { getCharPositionInLine()==25 }? ;
 
 DEF_TYPE_PI : [pP] [iI] { getCharPositionInLine()==25 }? ;
 
@@ -1495,9 +1498,9 @@ DEF_TYPE_PR : [pP] [rR] { getCharPositionInLine()==25 }? ;
 
 DEF_TYPE_DS : [dD] [sS] { getCharPositionInLine()==25 }? ;
 
-DEF_TYPE_S : [sS] [ ] { getCharPositionInLine()==25 }? ;
+DEF_TYPE_S : [sS] SPACE { getCharPositionInLine()==25 }? ;
 
-DEF_TYPE_BLANK : [ ] [ ] { getCharPositionInLine()==25 }? ;
+DEF_TYPE_BLANK : SPACE SPACE { getCharPositionInLine()==25 }? ;
 
 DEF_TYPE : [a-zA-Z0-9 ] [a-zA-Z0-9 ] { getCharPositionInLine()==25 }? ;
 
@@ -1566,7 +1569,7 @@ FS_Organization : [a-zA-Z ] { getCharPositionInLine()==35 }? ;
 
 FS_Device : WORD5 [a-zA-Z ] [a-zA-Z ] { getCharPositionInLine()==42 }? ;
 
-FS_Reserved : [ ] { getCharPositionInLine()==43 }? -> pushMode(FREE);
+FS_Reserved : SPACE { getCharPositionInLine()==43 }? -> pushMode(FREE);
 
 FS_WhiteSpace : [ \t] { getCharPositionInLine()>80 }? [ \t]* -> skip  ;
 
@@ -1625,7 +1628,7 @@ OS_EditNames : [ 0-9A-Za-z] { getCharPositionInLine()==44 }? ;
 
 OS_BlankAfter : [ bB] { getCharPositionInLine()==45 }? ;
 
-OS_Reserved1 : [ ]  { getCharPositionInLine()==46}?-> skip;
+OS_Reserved1 : SPACE  { getCharPositionInLine()==46}?-> skip;
 
 OS_EndPosition : WORD5 { getCharPositionInLine()==51 }? ;
 
@@ -2000,7 +2003,7 @@ CS_BlankFactor : '              '
 
 // Factor to end of line is blank
 CS_BlankFactor_EOL : '              '
-    { getCharPositionInLine()==25 }? [ ]* NEWLINE -> type(EOL), popMode;
+    { getCharPositionInLine()==25 }? SPACE* NEWLINE -> type(EOL), popMode;
 
 CS_FactorWs : (' '
     { (getCharPositionInLine()>=12 && getCharPositionInLine()<=25)
@@ -2077,7 +2080,7 @@ CS_FactorColon : ([:]
 CS_OperationAndExtender_Blank :  '          '
     { getCharPositionInLine()==35 }? ;
 
-CS_OperationAndExtender_WS : ( [ ]
+CS_OperationAndExtender_WS : ( SPACE
     { getCharPositionInLine()>=26 && getCharPositionInLine()<36
     }? )+
     -> skip;
@@ -2438,7 +2441,7 @@ CS_EOL : NEWLINE -> type(EOL), popMode;
 
 mode FixedOpExtender;
 CS_FixedOperationAndExtender_WS :
-    ([ ]
+    (SPACE
       { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }?
     )+
     -> skip;
@@ -2451,7 +2454,7 @@ CS_FixedOperationExtenderReturn : { getCharPositionInLine()>=25 && getCharPositi
 
 mode FixedOpExtender2;
 CS_FixedOperationAndExtender2_WS :
-    ([ ]
+    (SPACE
     { getCharPositionInLine()>=26 && getCharPositionInLine()<36
     }? )+
     -> skip;
@@ -2486,13 +2489,13 @@ FreeOpExtender_Extender : [a-zA-Z0-9\\-] -> type(CS_OperationAndExtender);
 
 
 mode OnOffIndicatorMode;
-BlankFlag : [ ] -> popMode, pushMode(IndicatorMode);
+BlankFlag : SPACE -> popMode, pushMode(IndicatorMode);
 
 NoFlag : [nN] -> popMode, pushMode(IndicatorMode);
 
 
 mode IndicatorMode;
-BlankIndicator : [ ] [ ] -> popMode;
+BlankIndicator : SPACE SPACE -> popMode;
 
 GeneralIndicator : ([0] [1-9] | [1-9] [0-9]) -> popMode;
 
@@ -2528,7 +2531,7 @@ OtherTextIndicator : ~[\r\n]~[\r\n] ;
 
 
 mode FIXED_CalcSpec_SQL;
-CSQL_EMPTY_TEXT : [ ] { getCharPositionInLine()>=8 }? [ ]* -> skip;
+CSQL_EMPTY_TEXT : SPACE { getCharPositionInLine()>=8 }? SPACE* -> skip;
 
 CSQL_TEXT : ~[\r\n] { getCharPositionInLine()>=8 }? ~[\r\n]*;
 
@@ -2569,7 +2572,7 @@ C2_FACTOR2 : ~[\r\n] { getCharPositionInLine()==36 }?
 C2_OTHER : ~('\r' | '\n') { getCharPositionInLine()<36 }?  -> skip;
 
 fragment
-REPEAT_FIXED_CalcSpec_X2 : '+' [ ]+ NEWLINE;
+REPEAT_FIXED_CalcSpec_X2 : '+' SPACE+ NEWLINE;
 
 
 mode FIXED_InputSpec;
