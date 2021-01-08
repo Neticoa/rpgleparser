@@ -6,7 +6,7 @@
 
 	<groupId>com.github.rpgleparser</groupId>
 	<artifactId>rpgleparser</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<name>rpgleparser</name>
 	<description>
@@ -30,6 +30,7 @@
 		<connection>scm:git:git@github.com:rpgleparser/rpgleparser.git</connection>
 		<developerConnection>scm:git:git@github.com:rpgleparser/rpgleparser.git</developerConnection>
 		<url>git@github.com:rpgleparser/rpgleparser.git</url>
+		<tag>HEAD</tag>
 	</scm>
 	
 	<licenses>
