@@ -971,6 +971,8 @@ EQUAL : '=' ;
 
 COLON : ':' -> pushMode(CheckDuration);
 
+COMMA : ',';
+
 FREE_BY : [bB] [yY] ;
 
 FREE_TO : [tT] [oO] ;
@@ -1133,7 +1135,7 @@ OP_BITOFF : [bB] [iI] [tT] [oO] [fF] [fF] ;
 
 OP_BITON : [bB] [iI] [tT] [oO] [nN] ;
 
-OP_CABxx : [cc] [aA] [bB] [0-9] [0-9] ;
+OP_CABxx : [cC] [aA] [bB] [0-9] [0-9] ;
 
 OP_CABEQ : [cC] [aA] [bB] [eE] [qQ] ;
 
