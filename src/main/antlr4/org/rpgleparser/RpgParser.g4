@@ -1829,6 +1829,7 @@ dir_copy: (DIR_COPY
 dir_include: (DIR_INCLUDE 
 		   (
 			(((library=copyText DIR_Slash)? file=copyText)? member=copyText)
+			| (file=copyText member=copyText)
 			| (DIR_Slash? (copyText DIR_Slash)+ copyText)
 		   )
 		   (DIR_OtherText+)?
@@ -1844,7 +1845,7 @@ dir_undefine: DIR_UNDEFINE name=DIR_OtherText;
 dir_eof:DIR_EOF;
 beginfree_directive: DIR_FREE;
 endfree_directive: DIR_ENDFREE;
-copyText: DIR_OtherTextf
+copyText: DIR_OtherText
  | (StringLiteralStart StringContent StringLiteralEnd)
  | DIR_NOT
  | DIR_DEFINE;

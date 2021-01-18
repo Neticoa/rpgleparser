@@ -126,7 +126,7 @@ public class TestFiles {
                 System.out.println(actualTokens.length());
                 final byte[] expectedTokensBytes = expectedTokens.getBytes(StandardCharsets.UTF_8);
                 final byte[] actualTokensBytes   = actualTokens.getBytes(StandardCharsets.UTF_8);
-                for ( int i = 0 ; i <  expectedTokensBytes.length ; ++ i) {
+                for ( int i = 0 ; i <  Math.min(expectedTokensBytes.length, actualTokensBytes.length) ; ++ i) {
                     if (expectedTokensBytes[i] != actualTokensBytes[i]) {
                         System.err.println("Error position "+ i  + " " + "["+ expectedTokensBytes[i]+ ","+ actualTokensBytes[i]+ "] : "+ Character.valueOf((char) expectedTokensBytes[i]));
                     }
@@ -145,7 +145,7 @@ public class TestFiles {
             System.out.println("/*===TOKENS===*/\n" + actualTokens + "\n");
             System.out.println("/*===TREE===*/\n" + actualTree + "\n/*======*/");
         }
-        assertThat(errors, is(empty()));
+        assertThat("No parsing error expected", errors, is(empty()));
 
         if ((expectedTree == null) || (expectedTree.trim().length() == 0) || rewriteExpectFile) {
             writeExpectFile(expectedFile, actualTokens, actualTree);
