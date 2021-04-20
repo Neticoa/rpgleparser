@@ -1795,9 +1795,14 @@ MatchingRecordIndicator
 
 hspec_fixed: HS_FIXED 
 	hs_expression*
+	hs_fixed_comments*?
+	hs_expression*?
+	hs_fixed_comments*?
 	(EOL|EOF);
+
 hs_expression: (ID (OPEN_PAREN (hs_parm (COLON hs_parm)*)? CLOSE_PAREN)?);
-hs_parm: ID | hs_string | symbolicConstants;
+hs_fixed_comments: HS_FixedComments;
+hs_parm: ID | hs_string | symbolicConstants | NUMBER;
 hs_string: StringLiteralStart (StringContent | StringEscapedQuote )* StringLiteralEnd;
 blank_line: BLANK_LINE;
 directive: DIRECTIVE 

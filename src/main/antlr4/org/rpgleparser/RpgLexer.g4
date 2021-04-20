@@ -131,7 +131,7 @@ DIR_NOT : [nN] [oO] [tT] ;
 
 DIR_DEFINED : [dD] [eE] [fF] [iI] [nN] [eE] [dD] ;
 
-DIR_Number : NUMBER -> type(NUMBER);
+DIR_numeric_constant : NUMBER -> type(NUMBER);
 
 DIR_WhiteSpace : SPACE -> skip;
 
@@ -1393,7 +1393,7 @@ FIXED_FREE_STRING_CONTINUATION_Part2 :
      )  // If it plus continuation eat whitespace.
    )
    -> skip ;
-   
+
 //Deliberate match no char, pop out again
 EatCommentLines_NothingLeft : -> popMode, skip;
 
@@ -1592,24 +1592,24 @@ OS_FieldReserved :  '              ' { getCharPositionInLine()==20}?
 
 OS_Type : [a-zA-Z ] { getCharPositionInLine()==17 }? ;
 
-OS_AddDelete : ([aA] [dD] [dD] | [dD] [eE] [lL]) 
-    { getCharPositionInLine()==20 
+OS_AddDelete : ([aA] [dD] [dD] | [dD] [eE] [lL])
+    { getCharPositionInLine()==20
     }? -> pushMode(FIXED_OutputSpec_PGM1), pushMode(OnOffIndicatorMode), pushMode(OnOffIndicatorMode), pushMode(OnOffIndicatorMode);
 
-OS_FetchOverflow : (' ' | [fFrR]) '  ' 
-    { getCharPositionInLine()==20 
+OS_FetchOverflow : (' ' | [fFrR]) '  '
+    { getCharPositionInLine()==20
     }? -> pushMode(OnOffIndicatorMode), pushMode(OnOffIndicatorMode), pushMode(OnOffIndicatorMode);
 
 OS_ExceptName : WORD5 WORD5 { getCharPositionInLine()==39 }? ;
 
-OS_Space3 : [ 0-9] [ 0-9] [ 0-9] 
+OS_Space3 : [ 0-9] [ 0-9] [ 0-9]
     { getCharPositionInLine()==42 || getCharPositionInLine()==45
-      || getCharPositionInLine()==48 || getCharPositionInLine()==51 
+      || getCharPositionInLine()==48 || getCharPositionInLine()==51
      }? ;
 
 OS_RemainingSpace :  '                             ' { getCharPositionInLine()==80 }? ;
 
-OS_Comments : CS_Comments -> channel(HIDDEN) ; 
+OS_Comments : CS_Comments -> channel(HIDDEN) ;
 
 OS_WS : [ \t] { getCharPositionInLine()>80 }? [ \t]* -> type(WS), skip  ; // skip spaces, tabs, newlines
 
@@ -1966,7 +1966,7 @@ CS_Factor2_SPLAT_YEARS : SPLAT_YEARS {35+6<= getCharPositionInLine() && getCharP
 
 CS_Factor2_SPLAT_Y : SPLAT_Y {35+2<= getCharPositionInLine() && getCharPositionInLine()<=48 }? -> type(SPLAT_Y);
 
-//Result 
+//Result
 
 //Duration
 CS_Result_SPLAT_D : SPLAT_D {49+2<= getCharPositionInLine() && getCharPositionInLine()<=62 }? -> type(SPLAT_D);
@@ -2010,7 +2010,7 @@ CS_BlankFactor_EOL : '              '
 CS_FactorWs : (' '
     { (getCharPositionInLine()>=12 && getCharPositionInLine()<=25)
       || (getCharPositionInLine()>=36 && getCharPositionInLine()<=49)
-    }?  
+    }?
     )+
     -> skip;
 
@@ -2018,7 +2018,7 @@ CS_FactorWs2 : (' '
     { (getCharPositionInLine()>=50 && getCharPositionInLine()<=63)
     }? )+
     -> skip;
-        
+
 // This rather awkward token matches a literal. including whitespace literals
 CS_FactorContentHexLiteral : [xX] [']
     { (getCharPositionInLine()>=13 && getCharPositionInLine()<=25)
@@ -2026,42 +2026,42 @@ CS_FactorContentHexLiteral : [xX] [']
             || (getCharPositionInLine()>=51 && getCharPositionInLine()<=63)
     }?
     -> type(HexLiteralStart), pushMode(InFactorStringMode);
-        
+
 CS_FactorContentDateLiteral : [dD] [']
     { (getCharPositionInLine()>=13 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=37 && getCharPositionInLine()<=49)
             || (getCharPositionInLine()>=51 && getCharPositionInLine()<=63)
     }?
          -> type(DateLiteralStart), pushMode(InFactorStringMode);
-        
+
 CS_FactorContentTimeLiteral : [tT] [']
     { (getCharPositionInLine()>=13 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=37 && getCharPositionInLine()<=49)
             || (getCharPositionInLine()>=51 && getCharPositionInLine()<=63)
     }?
     -> type(TimeLiteralStart), pushMode(InFactorStringMode);
-        
+
 CS_FactorContentGraphicLiteral : [gG] [']
     {(getCharPositionInLine()>=13 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=37 && getCharPositionInLine()<=49)
             || (getCharPositionInLine()>=51 && getCharPositionInLine()<=63)
     }?
     -> type(GraphicLiteralStart), pushMode(InFactorStringMode);
-        
-CS_FactorContentUCS2Literal : [uU] ['] 
+
+CS_FactorContentUCS2Literal : [uU] [']
     {(getCharPositionInLine()>=13 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=37 && getCharPositionInLine()<=49)
             || (getCharPositionInLine()>=51 && getCharPositionInLine()<=63)
     }?
     -> type(UCS2LiteralStart), pushMode(InFactorStringMode);
-        
-CS_FactorContentStringLiteral : ['] 
+
+CS_FactorContentStringLiteral : [']
      {(getCharPositionInLine()>=12 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=36 && getCharPositionInLine()<=49)
             || (getCharPositionInLine()>=50 && getCharPositionInLine()<=63)
     }?
     -> type(StringLiteralStart), pushMode(InFactorStringMode);
-                
+
 CS_FactorContent : (~[\r\n'\'' :]
     {(getCharPositionInLine()>=12 && getCharPositionInLine()<=25)
             || (getCharPositionInLine()>=36 && getCharPositionInLine()<=49)
@@ -2426,13 +2426,13 @@ CS_OperationExtenderClose : CLOSE_PAREN { getCharPositionInLine()>=26 && getChar
     { getCharPositionInLine()>=26 && getCharPositionInLine()<36
     }? )* { setText(getText().trim()); }
     -> type(CLOSE_PAREN);
-  
+
 CS_FieldLength : [+\\- 0-9] [+\\- 0-9] [+\\- 0-9] [+\\- 0-9] [+\\- 0-9]  { getCharPositionInLine()==68 }? ;
 
 CS_DecimalPositions : [ 0-9] [ 0-9] { getCharPositionInLine()==70 }?
-    -> pushMode(IndicatorMode), pushMode(IndicatorMode), pushMode(IndicatorMode); 
+    -> pushMode(IndicatorMode), pushMode(IndicatorMode), pushMode(IndicatorMode);
 
-CS_WhiteSpace : [ \t] { getCharPositionInLine()>=77 }? [ \t]* -> skip  ; 
+CS_WhiteSpace : [ \t] { getCharPositionInLine()>=77 }? [ \t]* -> skip  ;
 
 CS_Comments : ~[\r\n] { getCharPositionInLine()>80 }? ~[\r\n]*  ;
 
@@ -2448,7 +2448,7 @@ CS_FixedOperationAndExtender_WS :
     )+
     -> skip;
 
-CS_FixedOperationExtenderOpen : OPEN_PAREN { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }? 
+CS_FixedOperationExtenderOpen : OPEN_PAREN { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }?
     -> type(OPEN_PAREN), popMode, pushMode(FixedOpExtender2);
 
 CS_FixedOperationExtenderReturn : { getCharPositionInLine()>=25 && getCharPositionInLine()<=35 }? -> skip, popMode;
@@ -2461,15 +2461,15 @@ CS_FixedOperationAndExtender2_WS :
     }? )+
     -> skip;
 
-CS_FixedOperationAndExtender2 :  
+CS_FixedOperationAndExtender2 :
    ([a-zA-Z0-9\\-]
    { getCharPositionInLine()>=26 && getCharPositionInLine()<36
    }? )+
    -> type(CS_OperationAndExtender);
 
-CS_FixedOperationExtender2Close : CLOSE_PAREN { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }? 
+CS_FixedOperationExtender2Close : CLOSE_PAREN { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }?
   (' '
-      { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }? 
+      { getCharPositionInLine()>=26 && getCharPositionInLine()<36 }?
   )* { setText(getText().trim()); }
   -> type(CLOSE_PAREN);
 
@@ -2667,8 +2667,11 @@ HS_ID : [#@%$*a-zA-Z] [&#@$*a-zA-Z0-9_/,.-]* -> type(ID);
 
 HS_WhiteSpace : [ \t]+ -> skip  ; // skip spaces, tabs
 
-HS_CONTINUATION : NEWLINE 
+HS_CONTINUATION : NEWLINE
     WORD5 [hH] ~[*] -> skip;
 
 HS_EOL : NEWLINE -> type(EOL), popMode;
 
+HS_NUMBER: NUMBER -> pushMode(NumberContinuation), type(NUMBER) ;
+
+HS_FixedComments : ~[\r\n] { getCharPositionInLine()>=80 }? ~[\r\n]*  ;
