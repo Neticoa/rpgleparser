@@ -2197,7 +2197,7 @@ bif_mseconds: BIF_MSECONDS OPEN_PAREN numberexpression=expression CLOSE_PAREN;
 bif_nullind: BIF_NULLIND OPEN_PAREN fieldname=identifier CLOSE_PAREN;
 bif_occur: BIF_OCCUR OPEN_PAREN dsnname=identifier CLOSE_PAREN;
 bif_open: BIF_OPEN OPEN_PAREN filenameident=identifier CLOSE_PAREN;
-bif_paddr: BIF_PADDR OPEN_PAREN identifier CLOSE_PAREN;
+bif_paddr: BIF_PADDR OPEN_PAREN (identifier|(procedure_name)) CLOSE_PAREN;
 bif_parms: BIF_PARMS (OPEN_PAREN CLOSE_PAREN)?;
 bif_parmnum: BIF_PARMNUM OPEN_PAREN identifier CLOSE_PAREN;
 bif_realloc: BIF_REALLOC OPEN_PAREN ptr=identifier COLON num=expression CLOSE_PAREN;
@@ -2601,3 +2601,6 @@ SPLAT_ALL
    | SPLAT_PROC
    | SPLAT_STATUS
    ;
+
+// METRIXWARE
+procedure_name: literal;
